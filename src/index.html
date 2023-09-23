@@ -10,14 +10,20 @@
 
 <body>
     <main>
-    <h1>Vanilla JavaScript App</h1>
-    <p>Loading content from the API: <b id="name">...</b></p>
+        <a href="/.auth/login/aad">login</a>
+    <h1>Vanilla JavaScript App Update</h1>
+    <p>Loading content from the API: <pre id="name">...</pre></p>
+    <p>auth me <pre id="me">...</pre></p>
     </main>
 
     <script>
     (async function() {
-        const { text } = await( await fetch(`/api/Contacts`)).json();
-        document.querySelector('#name').textContent = text;
+        const result = await( await fetch(`/api/Contacts`)).json();
+        document.querySelector('#name').textContent = JSON.stringify(result, null, 2);
+
+        const meResult = await( await fetch(`.auth/me`)).json();
+        document.querySelector('#me').textContent = JSON.stringify(meResult, null, 2);
+
     }());
     </script>
 </body>

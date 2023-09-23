@@ -7,29 +7,43 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using api.Services;
+using System.Collections.Generic;
+using api.Domain;
 
 namespace StaticWebApp.Api
 {
-    public static class Contacts
+    public class Contacts
     {
+        private readonly IContactService _contactService;
+
+        public Contacts(IContactService contactService)
+        {
+            _contactService = contactService ?? throw new ArgumentNullException(nameof(contactService));
+        }
+
         [FunctionName("Contacts")]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            try
+            {
+                log.LogInformation("C# HTTP trigger function processed a request.");
 
-            string name = req.Query["name"];
+                List<Contact> contacts = await _contactService.GetAllContactsAsync();
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
+                return new OkObjectResult(contacts);
+            }
+            catch(Exception ex)
+            {
+                log.LogError(ex, "Failed to get contacts");
 
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
-
-            return new OkObjectResult(responseMessage);
+                return new OkObjectResult(ex.Message)
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
         }
     }
 }
