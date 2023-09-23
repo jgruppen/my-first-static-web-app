@@ -1,10 +1,31 @@
 {
     "routes": [
-        {
-            "route": "/example",
-            "rewrite": "/example.html"
-        }
+        {  
+            "route": "/.auth/login/aadb2c",  
+            "allowedRoles": [  
+              "authenticated",  
+              "anonymous"  
+            ],  
+            "headers": {  
+              "Content-Type": "application/javascript"  
+            }  
+          },  
+          {  
+            "route": "/*",  
+            "allowedRoles": [  
+              "authenticated"  
+            ]  
+          }
     ],
+    "globalHeaders": {  
+        "Content-Type": "application/javascript"  
+    },
+    "responseOverrides": {  
+        "401": {  
+          "statusCode": 302,  
+          "redirect": "/.auth/login/aadb2c"  
+        }  
+    }, 
     "navigationFallback": {
         "rewrite": "/index.html"
     },
